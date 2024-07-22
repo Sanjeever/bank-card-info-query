@@ -31,5 +31,11 @@ Locally preview production build:
 ```bash
 pnpm run preview
 ```
+
 ## Thanks
+
 - [cnbankcard](https://github.com/digglife/cnbankcard)
+
+## LICENSE
+
+[MIT](LICENSE)
