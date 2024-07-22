@@ -3,6 +3,8 @@ import { NForm, useMessage } from 'naive-ui'
 import qs from 'qs'
 
 const message = useMessage()
+const bankDict = useBankDict()
+const cardTypeDict = useCardTypeDict()
 const formRef = ref<InstanceType<typeof NForm> | null>()
 const form = reactive({
   cardNo: '',
@@ -89,10 +91,12 @@ function handleClickQuery() {
       label-placement="left"
       title="查询结果">
       <n-descriptions-item label="卡类型">
-        {{ data.cardType }}
+        {{ cardTypeDict[data.cardType] }} {{ data.cardType }}
       </n-descriptions-item>
-      <n-descriptions-item label="行代码">{{ data.bank }}</n-descriptions-item>
       <n-descriptions-item label="发卡行">
+        {{ bankDict[data.bank] }} {{ data.bank }}
+      </n-descriptions-item>
+      <n-descriptions-item label="行图标">
         <n-image width="128px" height="36px" :src="src" />
       </n-descriptions-item>
     </n-descriptions>
