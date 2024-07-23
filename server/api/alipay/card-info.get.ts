@@ -1,4 +1,6 @@
+import { isNil, isNotNil } from 'es-toolkit'
 import { H3Event } from 'h3'
+import { cache } from '~/utils'
 
 export interface CardInfoResp {
   /**
@@ -35,15 +37,22 @@ export default defineEventHandler(async function (
   event: H3Event
 ): Promise<CardInfoResp> {
   const { cardNo } = getQuery(event)
-  const data = await $fetch('/validateAndCacheCardInfo.json', {
-    method: 'GET',
-    baseURL: 'https://ccdcapi.alipay.com',
-    params: {
-      _input_charset: 'utf-8',
-      cardBinCheck: true,
-      cardNo,
-    },
-  })
+  const cacheKey = `bank-card:${cardNo}`
+  let data = cache.get<CardInfoResp>(cacheKey)
+  if (isNil(data)) {
+    data = await $fetch('/validateAndCacheCardInfo.json', {
+      method: 'GET',
+      baseURL: 'https://ccdcapi.alipay.com',
+      params: {
+        _input_charset: 'utf-8',
+        cardBinCheck: true,
+        cardNo,
+      },
+    })
+    if (isNotNil(cardNo)) {
+      cache.set(cacheKey, data)
+    }
+  }
   setHeaders(event, {
     'content-type': 'application/json',
     'cache-control': 'public, s-maxage=1800, stale-while-revalidate=2400',

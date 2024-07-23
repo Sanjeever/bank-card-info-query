@@ -12,6 +12,7 @@
     "update:deps": "taze -w"
   },
   "dependencies": {
+    "es-toolkit": "^1.13.1",
     "naive-ui": "^2.39.0",
     "nuxt": "^3.12.4",
     "nuxtjs-naive-ui": "^1.0.2",
