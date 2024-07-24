@@ -100,7 +100,6 @@ function handleInput(value: string) {
         <el-input
           v-model="form.cardNo"
           @input="handleInput"
-          style="width: 200px"
           placeholder="请输入银行卡号"
           size="large"
           show-word-limit
