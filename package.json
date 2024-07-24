@@ -18,6 +18,7 @@
     "vue": "latest"
   },
   "devDependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
     "@element-plus/nuxt": "^1.0.9",
     "@types/qs": "^6.9.15",
     "@vueuse/core": "^10.11.0",

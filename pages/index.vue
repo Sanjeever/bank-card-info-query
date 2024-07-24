@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ElMessage, type FormInstance } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 import qs from 'qs'
 
 const bankDict = useBankDict()
@@ -106,7 +107,9 @@ function handleInput(value: string) {
           clearable />
       </el-form-item>
       <el-form-item label="操作">
-        <el-button type="primary" @click="handleClickQuery">查询</el-button>
+        <el-button type="primary" :icon="Search" @click="handleClickQuery">
+          查询
+        </el-button>
       </el-form-item>
     </el-form>
     <transition name="el-fade-in-linear">
