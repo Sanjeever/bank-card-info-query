@@ -9,11 +9,7 @@ const loading = ref(false)
 const form = reactive({
   cardNo: '',
 })
-const data = reactive({
-  cardType: '',
-  bank: '',
-  key: '',
-})
+const data = reactive(initializeData())
 const src = computed(() => {
   const query = {
     d: 'cashier',
@@ -32,6 +28,23 @@ const rules = {
       trigger: 'blur',
     },
   ],
+}
+
+watch(
+  () => form.cardNo,
+  _cardNo => {
+    if (_cardNo.length === 0) {
+      Object.assign(data, initializeData())
+    }
+  }
+)
+
+function initializeData() {
+  return {
+    cardType: '',
+    bank: '',
+    key: '',
+  }
 }
 
 async function fetchData() {
@@ -59,9 +72,7 @@ async function fetchData() {
 }
 
 async function handleClickQuery() {
-  data.cardType = ''
-  data.bank = ''
-  data.key = ''
+  Object.assign(data, initializeData())
   await formRef.value?.validate((valid, fields) => {
     if (valid) {
       fetchData()
@@ -99,19 +110,21 @@ function handleInput(value: string) {
         <el-button type="primary" @click="handleClickQuery">查询</el-button>
       </el-form-item>
     </el-form>
-    <el-descriptions v-if="hasData" title="查询结果" :column="1" size="large">
-      <el-descriptions-item label="卡类型">
-        {{ cardTypeDict[data.cardType] }} {{ data.cardType }}
-      </el-descriptions-item>
-      <el-descriptions-item label="发卡行">
-        {{ bankDict[data.bank] }} {{ data.bank }}
-      </el-descriptions-item>
-      <el-descriptions-item label="行图标">
-        <el-image
-          style="width: 128px; height: 36px"
-          :src="src"
-          :preview-src-list="[src]" />
-      </el-descriptions-item>
-    </el-descriptions>
+    <transition name="el-fade-in-linear">
+      <el-descriptions v-if="hasData" title="查询结果" :column="1" size="large">
+        <el-descriptions-item label="卡类型">
+          {{ cardTypeDict[data.cardType] }} {{ data.cardType }}
+        </el-descriptions-item>
+        <el-descriptions-item label="发卡行">
+          {{ bankDict[data.bank] }} {{ data.bank }}
+        </el-descriptions-item>
+        <el-descriptions-item label="行图标">
+          <el-image
+            style="width: 128px; height: 36px"
+            :src="src"
+            :preview-src-list="[src]" />
+        </el-descriptions-item>
+      </el-descriptions>
+    </transition>
   </div>
 </template>
