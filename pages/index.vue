@@ -5,6 +5,7 @@ import qs from 'qs'
 const bankDict = useBankDict()
 const cardTypeDict = useCardTypeDict()
 const formRef = ref<FormInstance>()
+const loading = ref(false)
 const form = reactive({
   cardNo: '',
 })
@@ -13,13 +14,15 @@ const data = reactive({
   bank: '',
   key: '',
 })
-const success = ref(false)
 const src = computed(() => {
   const query = {
     d: 'cashier',
     t: data.bank,
   }
   return `https://apimg.alipay.com/combo.png?${qs.stringify(query)}`
+})
+const hasData = computed(() => {
+  return data.cardType !== '' && data.bank !== '' && data.key !== ''
 })
 const rules = {
   cardNo: [
@@ -32,31 +35,35 @@ const rules = {
 }
 
 async function fetchData() {
-  const resp = await $fetch('/api/alipay/card-info', {
-    method: 'GET',
-    query: {
-      ...form,
-    },
-  })
-  if (resp.messages.length === 0) {
-    data.cardType = resp.cardType
-    data.bank = resp.bank
-    data.key = resp.key
-    success.value = true
-  } else {
-    success.value = false
-    const errorMsg = resp.messages.map(message => message.errorCodes).join(',')
-    ElMessage.warning(errorMsg)
+  loading.value = true
+  try {
+    const resp = await $fetch('/api/alipay/card-info', {
+      method: 'GET',
+      query: {
+        ...form,
+      },
+    })
+    if (resp.messages.length === 0) {
+      data.cardType = resp.cardType
+      data.bank = resp.bank
+      data.key = resp.key
+    } else {
+      const errorMsg = resp.messages
+        .map(message => message.errorCodes)
+        .join(',')
+      ElMessage.warning(errorMsg)
+    }
+  } finally {
+    loading.value = false
   }
 }
 
 async function handleClickQuery() {
-  success.value = false
+  data.cardType = ''
+  data.bank = ''
+  data.key = ''
   await formRef.value?.validate((valid, fields) => {
     if (valid) {
-      data.cardType = ''
-      data.bank = ''
-      data.key = ''
       fetchData()
     }
   })
@@ -71,6 +78,7 @@ function handleInput(value: string) {
   <div>
     <el-form
       ref="formRef"
+      v-loading="loading"
       :model="form"
       :rules="rules"
       inline
@@ -91,7 +99,7 @@ function handleInput(value: string) {
         <el-button type="primary" @click="handleClickQuery">查询</el-button>
       </el-form-item>
     </el-form>
-    <el-descriptions v-if="success" title="查询结果" :column="1" size="large">
+    <el-descriptions v-if="hasData" title="查询结果" :column="1" size="large">
       <el-descriptions-item label="卡类型">
         {{ cardTypeDict[data.cardType] }} {{ data.cardType }}
       </el-descriptions-item>
