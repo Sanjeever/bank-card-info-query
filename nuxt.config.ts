@@ -1,32 +1,24 @@
-import AutoImport from 'unplugin-auto-import/vite'
-import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
-import Components from 'unplugin-vue-components/vite'
 import postcss from './postcss.config'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  app: {
+    head: {
+      title: 'Bank Card Info Query',
+      meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      ],
+      link: [
+        {
+          rel: 'icon',
+          href: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💳</text></svg>',
+        },
+      ],
+    },
+  },
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
   css: ['~/assets/css/app.css'],
   postcss,
-  modules: ['nuxtjs-naive-ui', '@vueuse/nuxt'],
-  vite: {
-    plugins: [
-      AutoImport({
-        imports: [
-          {
-            'naive-ui': [
-              'useDialog',
-              'useMessage',
-              'useNotification',
-              'useLoadingBar',
-            ],
-          },
-        ],
-      }),
-      Components({
-        resolvers: [NaiveUiResolver()],
-      }),
-    ],
-  },
+  modules: ['@element-plus/nuxt', '@vueuse/nuxt'],
 })

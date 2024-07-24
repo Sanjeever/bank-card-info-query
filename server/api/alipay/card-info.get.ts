@@ -49,7 +49,7 @@ export default defineEventHandler(async function (
         cardNo,
       },
     })
-    if (isNotNil(cardNo)) {
+    if (isNotNil(cardNo) && data?.validated) {
       cache.set(cacheKey, data)
     }
   }

@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { NForm, useMessage } from 'naive-ui'
+import { ElMessage, type FormInstance } from 'element-plus'
 import qs from 'qs'
 
-const message = useMessage()
 const bankDict = useBankDict()
 const cardTypeDict = useCardTypeDict()
-const formRef = ref<InstanceType<typeof NForm> | null>()
+const formRef = ref<FormInstance>()
 const form = reactive({
   cardNo: '',
 })
@@ -23,11 +22,13 @@ const src = computed(() => {
   return `https://apimg.alipay.com/combo.png?${qs.stringify(query)}`
 })
 const rules = {
-  cardNo: {
-    required: true,
-    message: '请输入银行卡号',
-    trigger: 'blur',
-  },
+  cardNo: [
+    {
+      required: true,
+      message: '请输入银行卡号',
+      trigger: 'blur',
+    },
+  ],
 }
 
 async function fetchData() {
@@ -45,14 +46,14 @@ async function fetchData() {
   } else {
     success.value = false
     const errorMsg = resp.messages.map(message => message.errorCodes).join(',')
-    message.error(errorMsg)
+    ElMessage.warning(errorMsg)
   }
 }
 
-function handleClickQuery() {
+async function handleClickQuery() {
   success.value = false
-  formRef.value?.validate(errors => {
-    if (!errors) {
+  await formRef.value?.validate((valid, fields) => {
+    if (valid) {
       data.cardType = ''
       data.bank = ''
       data.key = ''
@@ -60,45 +61,49 @@ function handleClickQuery() {
     }
   })
 }
+
+function handleInput(value: string) {
+  form.cardNo = value.replace(/[^0-9.]/g, '')
+}
 </script>
 
 <template>
   <div>
-    <n-form
+    <el-form
       ref="formRef"
-      inline
-      :label-width="80"
       :model="form"
       :rules="rules"
-      size="large">
-      <n-form-item label="银行卡号" path="cardNo">
-        <n-input
-          v-model:value="form.cardNo"
+      inline
+      label-position="top"
+      size="large"
+      label-width="auto">
+      <el-form-item prop="cardNo" label="银行卡号">
+        <el-input
+          v-model="form.cardNo"
+          @input="handleInput"
+          style="width: 200px"
           placeholder="请输入银行卡号"
-          :allow-input="(value: string) => !value || /^\d+$/.test(value)"
-          show-count
+          size="large"
+          show-word-limit
           clearable />
-      </n-form-item>
-      <n-form-item>
-        <n-button attr-type="button" @click.prevent="handleClickQuery">
-          查询
-        </n-button>
-      </n-form-item>
-    </n-form>
-    <n-descriptions
-      v-if="success"
-      :column="1"
-      label-placement="left"
-      title="查询结果">
-      <n-descriptions-item label="卡类型">
+      </el-form-item>
+      <el-form-item label="操作">
+        <el-button type="primary" @click="handleClickQuery">查询</el-button>
+      </el-form-item>
+    </el-form>
+    <el-descriptions v-if="success" title="查询结果" :column="1" size="large">
+      <el-descriptions-item label="卡类型">
         {{ cardTypeDict[data.cardType] }} {{ data.cardType }}
-      </n-descriptions-item>
-      <n-descriptions-item label="发卡行">
+      </el-descriptions-item>
+      <el-descriptions-item label="发卡行">
         {{ bankDict[data.bank] }} {{ data.bank }}
-      </n-descriptions-item>
-      <n-descriptions-item label="行图标">
-        <n-image width="128px" height="36px" :src="src" />
-      </n-descriptions-item>
-    </n-descriptions>
+      </el-descriptions-item>
+      <el-descriptions-item label="行图标">
+        <el-image
+          style="width: 128px; height: 36px"
+          :src="src"
+          :preview-src-list="[src]" />
+      </el-descriptions-item>
+    </el-descriptions>
   </div>
 </template>
