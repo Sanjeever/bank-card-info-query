@@ -1,6 +1,6 @@
-import { isNil, isNotNil } from 'es-toolkit'
+import Axios from 'axios'
+import { setupCache } from 'axios-cache-interceptor'
 import { H3Event } from 'h3'
-import { cache } from '~/utils'
 
 export interface CardInfoResp {
   /**
@@ -33,29 +33,25 @@ export interface CardInfoResp {
   stat: string
 }
 
+const request = setupCache(
+  Axios.create({
+    baseURL: 'https://ccdcapi.alipay.com',
+  })
+)
 export default defineEventHandler(async function (
   event: H3Event
 ): Promise<CardInfoResp> {
   const { cardNo } = getQuery(event)
-  const cacheKey = `bank-card:${cardNo}`
-  let data = cache.get<CardInfoResp>(cacheKey)
-  if (isNil(data)) {
-    data = await $fetch('/validateAndCacheCardInfo.json', {
-      method: 'GET',
-      baseURL: 'https://ccdcapi.alipay.com',
-      params: {
-        _input_charset: 'utf-8',
-        cardBinCheck: true,
-        cardNo,
-      },
-    })
-    if (isNotNil(cardNo) && data?.validated) {
-      cache.set(cacheKey, data)
-    }
-  }
+  const response = await request.get('/validateAndCacheCardInfo.json', {
+    params: {
+      _input_charset: 'utf-8',
+      cardBinCheck: true,
+      cardNo,
+    },
+  })
   setHeaders(event, {
     'content-type': 'application/json',
     'cache-control': 'public, s-maxage=1800, stale-while-revalidate=2400',
   })
-  return data as CardInfoResp
+  return response.data as CardInfoResp
 })
